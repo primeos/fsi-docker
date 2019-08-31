@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+  web:
+    image: fsinf/fse:latest
+    #build: fse
+    command:  python3 manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./fse:/code
+      - ./fse/static:/static
+      - ./script.sh:/code/script.sh
+    ports:
+      - "8000"
+    networks:
+      backend:
+        ipv4_address: 10.0.4.3
+
+  nginx:
+    image: fsinf/nginx
+    command: /usr/sbin/nginx -g 'daemon off;'
+    #deploy:
+    #  resources: 
+    #    limits:
+    #      memory: 512M
+    #read_only: true          # not supported in swarm mode, enable along with tmpfs
+    #tmpfs:
+    #  - /tmp:size=512K
+    #  - /hackmd/tmp:size=1M
+    #  # Make sure you remove this when you use filesystem as upload type
+    #  - /hackmd/public/uploads:size=10M
+    container_name: fse_nginx
+    #    command: sleep 3 && nginx
+    ports:
+      - "134.2.220.61:8600:443"
+    volumes: 
+      # we need to copy the files in the container after linking them from the host to make them accessible for the services running in the container (because of needed root rights on the host)
+      - ./fse/fachschaftsempfaenger/static/:/static/
+      - /srv/docker-certificates/fachschaftsempfaenger.fsi.uni-tuebingen.de/:/etc/nginx/ssl
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro 
+      - ./nginx-fse.conf:/etc/nginx/sites-enabled/nginx-fse.conf:ro
+    restart: always
+    networks:
+      backend:
+        ipv4_address: 10.0.4.2
+
+networks:
+  backend:
+    ipam:
+      config:
+        - subnet: 10.0.4.0/24
