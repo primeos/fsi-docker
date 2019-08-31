@@ -4,8 +4,10 @@ services:
     container_name: proxy
     build: .
     image: 'fsinf/proxy:latest'
-    #restart: always
+    restart: always
     hostname: 'proxy.fsi.uni-tuebingen.de'
     ports:
       - '134.2.220.61:80:80'
       - '134.2.220.61:443:443'
+    volumes:
+      - ./config/:/usr/local/etc/haproxy/
