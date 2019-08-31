@@ -1,2 +1,5 @@
 # Application data:
 data/
+
+# Private certificates:
+docker-certificates/
